@@ -18,7 +18,7 @@ sensors_event_t myEvent;
 #include <SD.h>
 #define SD_CS 4
 File dataFile;
-String fileName = "accLog.txt";
+String fileName = "accLog2.txt";
 
 //Real Time Clock
 #include "RTCZero.h"
@@ -50,6 +50,7 @@ uint8_t click;
 #if defined(ARDUINO_ARCH_SAMD)
 #define Serial Serial
 #endif
+#define ledGreen 8
 
 
 //Variables
@@ -64,7 +65,7 @@ int16_t myZ = 0;
 
 
 void setup() {
-
+	setupLED();
 	setupSerial();
 	setupLIS3DH();
 	setupLIS3DHClick();
@@ -79,8 +80,8 @@ void setup() {
 
 
 	//Green LED, setup finished
-	digitalWrite(8, HIGH);
-	pinMode(8, OUTPUT);
+	digitalWrite(16, HIGH);
+
 
 
 
@@ -100,7 +101,22 @@ void loop() {
 }
 
 
+void setupLED(){
+	pinMode(ledGreen, OUTPUT);
+	pinMode(16, OUTPUT);
 
+}
+
+void ledGreenOn(){
+	digitalWrite(ledGreen, HIGH);
+
+
+}
+
+void ledGreenOff(){
+	digitalWrite(ledGreen, LOW);
+
+}
 
 
 //Plot in Sloeber via Serial USB
@@ -192,10 +208,14 @@ void safeBufferCounterToSD(){
 	writeSensorStrDataToSD();
 	counter++;
 	if (counter == myNumber){
+		Serial.println("1000 lines saved at: " + getCurrentTime());
+		ledGreenOn();
 		dataFile.flush();
+		ledGreenOff();
 		Serial.println("1000 lines saved at: " + getCurrentTime());
 		Serial.println("Battery Voltage: " + String(getBatteryVoltage()) +"V");
 		counter = 0;
+
 
 	}
 

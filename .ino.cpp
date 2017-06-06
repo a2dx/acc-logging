@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-04 09:53:40
+//This file has been generated on 2017-06-06 16:29:48
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -17,6 +17,9 @@
 #include "RTCZero.h"
 void setup() ;
 void loop() ;
+void setupLED();
+void ledGreenOn();
+void ledGreenOff();
 void plotSerial(int16_t plotValue);
 void plot3Serial(int16_t plotValue1,int16_t plotValue2,int16_t plotValue3);
 void setupSerial();
