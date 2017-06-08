@@ -58,10 +58,18 @@ String xString = "";
 String yString = "";
 String zString = "";
 uint32_t counter = 0;
-uint32_t myNumber = 1000;  //some value for the counter
 int16_t myX = 0;
 int16_t myY = 0;
 int16_t myZ = 0;
+uint8_t myXbinA = 0;
+uint8_t myXbinB = 0;
+uint8_t myYbinA = 0;
+uint8_t myYbinB = 0;
+uint8_t myZbinA = 0;
+uint8_t myZbinB = 0;
+const uint32_t myNumber = 6000;  //some value for the counter
+uint8_t myAccbinint[myNumber];
+
 
 
 void setup() {
@@ -237,6 +245,26 @@ void writeSensorStrDataToSD(){
 	writeSDStringln(xString + "," + yString + "," + zString);
 
 }
+
+void writeSensorBinToArray(){
+	  accSensor.read();
+          myXbinA= accSensor.x >> 8;
+ 	  myXbinB= accSensor.x & 0x00FF;
+ 	  myYbinA= accSensor.y >> 8;
+ 	  myYbinB= accSensor.y & 0x00FF;
+ 	  myZbinA= accSensor.z >> 8;
+ 	  myZbinB= accSensor.z & 0x00FF;
+ 	  myAccbinint [0+counter] = myXbinA;
+ 	  myAccbinint [1+counter] = myXbinB;
+ 	  myAccbinint [2+counter] = myYbinA;
+ 	  myAccbinint [3+counter] = myYbinB;
+ 	  myAccbinint [4+counter] = myZbinA;
+ 	  myAccbinint [5+counter] = myZbinB;
+ 	  counter += 6 ;
+ 	  if(counter>=(myNumber-1)){
+ 		 dataFile.write(myAccbinint, myNumber);
+ 		 dataFile.close();
+ 	  };
 
 void deleteSDFile(){
 	SD.remove(fileName);
