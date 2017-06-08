@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-08 15:15:37
+//This file has been generated on 2017-06-08 15:28:01
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -32,6 +32,7 @@ void writeSDStringln(String str);
 void readSD();
 void safeBufferCounterToSD();
 void writeSensorStrDataToSD();
+void writeSensorBinToArray();
 void deleteSDFile();
 void setupRTC();
 String getCurrentTime();

@@ -265,6 +265,7 @@ void writeSensorBinToArray(){
  		 dataFile.write(myAccbinint, myNumber);
  		 dataFile.close();
  	  };
+}
 
 void deleteSDFile(){
 	SD.remove(fileName);
