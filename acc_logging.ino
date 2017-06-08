@@ -80,7 +80,7 @@ void setup() {
 
 
 	//Green LED, setup finished
-	digitalWrite(16, HIGH);
+	digitalWrite(ledGreen, HIGH);
 
 
 
@@ -89,7 +89,10 @@ void setup() {
 
 void loop() {
 	//---------------------------------
-	safeBufferCounterToSD();
+	//safeBufferCounterToSD();
+	readAcc();
+	Serial.println(accSensor.x);
+	delay(10);
 
 
 
@@ -169,6 +172,10 @@ void setupLIS3DH(){
 	accSensor.setDataRate(LIS3DH_DATARATE_400_HZ);
 	Serial.println("---LIS3DH initialized---");
 
+}
+
+void readAcc(){
+	accSensor.read();
 }
 
 

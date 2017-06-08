@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-06 16:29:48
+//This file has been generated on 2017-06-08 15:15:37
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -26,6 +26,7 @@ void setupSerial();
 void setupLIS3DHClick();
 void displayClickSerial();
 void setupLIS3DH();
+void readAcc();
 void setupSD();
 void writeSDStringln(String str);
 void readSD();
