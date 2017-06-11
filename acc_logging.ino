@@ -45,6 +45,7 @@ uint8_t currMonth = month;
 uint8_t currDay = day;
 
 //--------ErrorNum---------
+uint8_t currentError = 0;
 //LED Error blink
 #define errLIS3DH 1
 #define errNoSD 2
@@ -58,7 +59,7 @@ uint8_t click;
 #endif
 #define ledGreen 8
 #define ledRed 13
-#define interruptPin 16
+#define interruptPinRecord 16
 #define StateStandby 0
 #define StateCalibration 1
 #define StateRecord 2
@@ -105,9 +106,9 @@ void setup() {
 	setupSD();
 	setupRTC();
 
-	//	deleteSDFile();
-	//	dataFile = SD.open(fileName, FILE_WRITE);
-	//	readSD();
+	deleteSDFile();
+	dataFile = SD.open(fileName, FILE_WRITE);
+	readSD();
 
 
 	//Green LED, setup finished
@@ -122,15 +123,35 @@ void setup() {
 }
 
 void loop() {
+	//Recording
+	if (CurrState == StateRecord) {
+		startRecord();
 
+	}
+	//Calibration
+	if (CurrState == StateCalibration) {
+		calibration();
+	}
 
+	//Error message
+	if (CurrState == StateError) {
+		error(currentError);
+	}
 
-
-
-
+	//Wake up with the next interrupt
+	//goSleep();
 
 
 }
+
+
+void startRecord(){
+
+
+}
+
+
+
 
 void calibration(){
 	calcAccMedian();
@@ -166,9 +187,18 @@ void calcAccMedian(){
 	calibZMed = zSum/counterCalibrationMax;
 }
 
-//Current state of the device
-void setState(uint8_t stateToSet){
-	CurrState = stateToSet;
+//set the Current state of the device
+void setRecordState(){
+	CurrState = StateRecord;
+}
+void setCalibrationState(){
+	CurrState = StateCalibration;
+}
+void setErrorState(){
+	CurrState = StateError;
+}
+void setStandbyState(){
+	CurrState = StateStandby;
 }
 
 
@@ -186,8 +216,8 @@ void wakeUp(){
 }
 
 void setupInterrupt(){
-	pinMode(interruptPin, INPUT_PULLUP);
-	attachInterrupt(interruptPin,wakeUp, LOW);
+	pinMode(interruptPinRecord, INPUT_PULLUP);
+	attachInterrupt(interruptPinRecord,wakeUp, LOW);
 }
 
 

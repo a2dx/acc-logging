@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-11 19:40:57
+//This file has been generated on 2017-06-11 20:49:05
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -20,11 +20,15 @@
 #include "RTCZero.h"
 void setup() ;
 void loop() ;
+void startRecord();
 void calibration();
 double calcAngleEarth_XY(int vektor[3]);
 double calcAngle(int vektor1[3],int vektor2[3]);
 void calcAccMedian();
-void setState(uint8_t stateToSet);
+void setRecordState();
+void setCalibrationState();
+void setErrorState();
+void setStandbyState();
 void goSleep();
 void wakeUp();
 void setupInterrupt();
