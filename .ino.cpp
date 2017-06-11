@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-08 15:28:01
+//This file has been generated on 2017-06-11 19:40:57
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -11,13 +11,26 @@
 #include <Adafruit_Sensor.h>
 #define LIS3DH_CS 15
 #define CLICKTHRESHHOLD 50
+#include <math.h>
+#define CPU_HZ 48000000
+#define TIMER_PRESCALER_DIV 1024
 #include "simplot.h"
 #include <SD.h>
 #define SD_CS 4
 #include "RTCZero.h"
 void setup() ;
 void loop() ;
+void calibration();
+double calcAngleEarth_XY(int vektor[3]);
+double calcAngle(int vektor1[3],int vektor2[3]);
+void calcAccMedian();
+void setState(uint8_t stateToSet);
+void goSleep();
+void wakeUp();
+void setupInterrupt();
 void setupLED();
+void ledRedOn();
+void ledRedOff();
 void ledGreenOn();
 void ledGreenOff();
 void plotSerial(int16_t plotValue);
@@ -39,6 +52,12 @@ String getCurrentTime();
 String getCurrentDate();
 String getCurrentDateAndTime();
 float getBatteryVoltage();
+void error(uint8_t errno) ;
+void setTimerFrequency(int frequencyHz) ;
+void startTimer(int frequencyHz) ;
+void disableTimer() ;
+void resetTimer() ;
+void TC3_Handler() ;
 
 #include "acc_logging.ino"
 
