@@ -20,7 +20,9 @@ sensors_event_t myEvent;
 #include <SD.h>
 #define SD_CS 4
 File dataFile;
-String fileName = "accLog2.txt";
+File dataTarget;
+String fileName = "accraw77.dat";
+String targetName ="acclog88.csv";
 
 //Real Time Clock
 #include "RTCZero.h"
@@ -44,16 +46,13 @@ uint8_t currYear = year;
 uint8_t currMonth = month;
 uint8_t currDay = day;
 
-bool receivedSerialTime = false;
-
 //--------ErrorNum---------
-uint8_t currentError = 0;
 //LED Error blink
 #define errLIS3DH 1
 #define errNoSD 2
 //-------------------------
 
-//-----Initialisation-------
+//Initialisation
 Adafruit_LIS3DH accSensor = Adafruit_LIS3DH(LIS3DH_CS);
 uint8_t click;
 #if defined(ARDUINO_ARCH_SAMD)
@@ -61,26 +60,18 @@ uint8_t click;
 #endif
 #define ledGreen 8
 #define ledRed 13
+#define interruptPin 16
 #define StateStandby 0
 #define StateCalibration 1
 #define StateRecord 2
 #define StateError 3
 uint8_t CurrState = 0;     //0 = Standby  // 1 = Calibration // 2 = record //  3 = error
 
-//------buttons-----
-#define interruptPinRecord 16   //A2    (Start/Stop Record)
-#define interruptPinCalibration 17    //A3  (calibration)
-
-const unsigned int DEBOUNCE_TIME = 300;
-
-unsigned int counterButton = 0;
-static unsigned long last_interrupt_timeRecord = 0;
-static unsigned long last_interrupt_timeCalib = 0;
-//-----Timer-----
+//Timer
 uint16_t sampleRate = 50; //Sample Rate of the record
 bool state = 0; //timer test
 
-//----Variables-----
+//Variables
 String xString = "";
 String yString = "";
 String zString = "";
@@ -97,14 +88,13 @@ uint8_t myZbinB = 0;
 const uint32_t myNumber = 6000;  //some value for the counter
 uint8_t myAccbinint[myNumber];
 
-//-----Calibration-------
+//Calibration
 uint16_t counterCalibration = 0;
 const uint16_t counterCalibrationMax = 5000;
 int16_t calibXMed = 0;
 int16_t calibYMed = 0;
 int16_t calibZMed = 0;
-double rotAngleX = 0;
-double rotAngleY = 0;
+
 
 int test = 0;
 /////////////////////////////////
@@ -114,150 +104,61 @@ void setup() {
 	setupSerial();
 	setupLIS3DH();
 	//	setupLIS3DHClick();    //only a test, needs some improvement
-	//setupSD();
+	setupSD();
 	setupRTC();
 
-	//	deleteSDFile();
-	//	dataFile = SD.open(fileName, FILE_WRITE);
-	//	readSD();
+	deleteSDFile();
+	dataFile = SD.open(fileName, FILE_WRITE);
+	dataTarget = SD.open(targetName, FILE_WRITE);
+	//dataFile.close();
+	//dataFileTest = SD.open(fileNameTest, FILE_WRITE);
+
+	//readSD();
 
 
 	//Green LED, setup finished
 	ledRedOff();
-	ledGreenOff();
+	ledGreenOn();
 
 
-	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
+	//startTimer(10);   //Only a test for the timer with 30 Hz (green LED blinking)
 
-	waitForSetupRTCWithSerial();
-	Serial.println("My new Time: " + getCurrentDateAndTime());
-	setStandbyState();
-	//setCalibrationState();
+
+
 }
 
 void loop() {
 
-	//Recording
-	if (CurrState == StateRecord) {
-		startRecord();
-	}
-	//Calibration
-	if (CurrState == StateCalibration) {
-		calibration();
-	}
+writeSensorBinToArray();
 
-	//Error message
-	if (CurrState == StateError) {
-		error(currentError);
+if(counter>=(myNumber-1)){
+	copyDatToCsv();
+	Serial.println("done copying");
+	delay(500);
 	}
 
-	//time to wake up  (needed for buttons)
-	delay(300);
-	goSleep();
-	ledRedOff();
-	//time to wake up  (needed for buttons)
-	delay(300);
 
-	//Power Optimisation reset
-	accSensor.setDataRate(LIS3DH_DATARATE_400_HZ);
-	//-----------
+
 
 
 }
-
-
-void startRecord(){
-	Serial.println("Start record at: " + getCurrentTime());
-	ledGreenOn();
-	startTimer(5);
-	while (CurrState == StateRecord){
-		readAcc();
-		//writeSensorBinToArray();
-	}
-	disableTimer();
-	ledGreenOff();
-}
-
-
-
 
 void calibration(){
-	//Calibration Code
-
-
-	accSensor.setRange(LIS3DH_RANGE_2_G);
-
-	Serial.println("Iam Calibrating");
 	calcAccMedian();
-	Serial.println("Old x: " + String(calibXMed));
-	Serial.println("Old y: " + String(calibYMed));
-	Serial.println("Old z: " + String(calibZMed));
-	int earthVector[3] = {calibXMed,calibYMed,calibZMed};
 
-	calcAngleEarth_ZX(earthVector);
-	calcAngleEarth_ZY(earthVector);
 
-	Serial.println("RotAngleX: " + String(radianToDegree(rotAngleX)));
-	Serial.println("RotAngleY: " + String(radianToDegree(rotAngleY)));
-	rotationX(earthVector[0],earthVector[1],earthVector[2]);
-	earthVector[0] = calibXMed;
-	earthVector[1] = calibYMed;
-	earthVector[2] = calibZMed;
-	rotationY(earthVector[0],earthVector[1],earthVector[2]);
-
-	Serial.println("new x: " + String(calibXMed));
-	Serial.println("new y: " + String(calibYMed));
-	Serial.println("new z: " + String(calibZMed));
-
-	//After finished calibration
-
-	accSensor.setRange(LIS3DH_RANGE_16_G);
-	setStandbyState();
 }
 
-double radianToDegree(double rad){
-	return rad*180/PI;
+double calcAngleEarth_XY(int vektor[3]){
+	return 0; //---------------NOT FINISHED---------
+
 }
-
-void rotationX(int16_t x,int16_t y,int16_t z){
-
-	double myCos = cos(rotAngleX);
-	double mySin = sin(rotAngleX);
-
-	calibYMed = ((double)y)*myCos - ((double)z)*mySin;
-	calibZMed = ((double)y)*mySin + ((double)z)*myCos;
-}
-
-void rotationY(int16_t x,int16_t y,int16_t z){
-
-	double myCos = cos(rotAngleY);
-	double mySin = sin(rotAngleY);
-
-	calibXMed = ((double)x)*myCos + ((double)z)*mySin;
-	calibZMed = -((double)x)*mySin +((double)z)*myCos;
-}
-
-
-void calcAngleEarth_ZX(int vectorEarth[3]){
-	int vectorZ[3] = {0,1,0};
-	rotAngleX = calcAngle(vectorEarth, vectorZ);
-}
-
-void calcAngleEarth_ZY(int vectorEarth[3]){
-	int vectorZ[3] = {1,0,0};
-	rotAngleY = calcAngle(vectorEarth, vectorZ);
-}
-
 
 double calcAngle(int vektor1[3],int vektor2[3]){
 	int skalar = vektor1[0]*vektor2[0] + vektor1[1]*vektor2[1] +vektor1[2]*vektor2[2];
-	double length1 = sqrt(vektor1[0]*vektor1[0]+vektor1[1]*vektor1[1]+vektor1[2]*vektor1[2]);
-	double length2 = sqrt(vektor2[0]*vektor2[0]+vektor2[1]*vektor2[1]+vektor2[2]*vektor2[2]);
+	int length1 = sqrt(vektor1[0]*vektor1[0]+vektor1[1]*vektor1[1]+vektor1[3]*vektor1[3]);
+	int length2 = sqrt(vektor2[0]*vektor2[0]+vektor2[1]*vektor2[1]+vektor2[3]*vektor2[3]);
 	double result = (double)skalar/(length1*length2);
-	//	Serial.println("Length2: "+ String(length1));
-	//	Serial.println("Length1: "+ String(length2));
-	//	Serial.println("Skalar: "+ String(skalar));
-	//	Serial.println(String(result));
 	return asin(result);
 }
 
@@ -276,27 +177,15 @@ void calcAccMedian(){
 	calibZMed = zSum/counterCalibrationMax;
 }
 
-//set the Current state of the device
-void setRecordState(){
-	CurrState = StateRecord;
-}
-void setCalibrationState(){
-	CurrState = StateCalibration;
-}
-void setErrorState(){
-	CurrState = StateError;
-}
-void setStandbyState(){
-	CurrState = StateStandby;
+//Current state of the device
+void setState(uint8_t stateToSet){
+	CurrState = stateToSet;
 }
 
 
 void goSleep(){
-
-	//Power Optimisation
-	accSensor.setDataRate(LIS3DH_DATARATE_POWERDOWN);
 	Serial.println("Going to sleep at: " + getCurrentTime());
-	ledRedOn();
+	ledGreenOff();
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 	__WFI();
 }
@@ -308,15 +197,8 @@ void wakeUp(){
 }
 
 void setupInterrupt(){
-
-	//Start/Stop Record
-	pinMode(interruptPinRecord, INPUT_PULLUP);
-	attachInterrupt(interruptPinRecord,start_stopRecordInterrupt, LOW);
-
-	//Start calibration
-	pinMode(interruptPinCalibration, INPUT_PULLUP);
-	attachInterrupt(interruptPinCalibration,startCalibration, LOW);
-
+	pinMode(interruptPin, INPUT_PULLUP);
+	attachInterrupt(interruptPin,wakeUp, LOW);
 }
 
 
@@ -453,6 +335,26 @@ void writeSensorStrDataToSD(){
 
 }
 
+void copyDatToCsv(){
+	dataFile = SD.open(fileName);
+			while(dataFile.available()){
+				uint8_t x1csv = dataFile.read();
+				uint8_t x2csv = dataFile.read();
+				uint8_t y1csv = dataFile.read();
+				uint8_t y2csv = dataFile.read();
+				uint8_t z1csv = dataFile.read();
+				uint8_t z2csv = dataFile.read();
+				uint16_t xcsv = ((uint16_t)x1csv << 8)|(x2csv & 0xFF);
+				uint16_t ycsv = ((uint16_t)y1csv << 8)|(y2csv & 0xFF);
+				uint16_t zcsv = ((uint16_t)z1csv << 8)|(z2csv & 0xFF);
+				dataTarget.println((String)xcsv + "," + (String)ycsv + "," + (String)zcsv);
+
+			}
+	dataTarget.close();
+	Serial.println("done writing csv file");
+	counter=0;
+}
+
 void writeSensorBinToArray(){
 	accSensor.read();
 	myXbinA= accSensor.x >> 8;
@@ -468,16 +370,20 @@ void writeSensorBinToArray(){
 	myAccbinint [4+counter] = myZbinA;
 	myAccbinint [5+counter] = myZbinB;
 	counter += 6 ;
-	if(counter>=(myNumber-1)){
+	if(counter+5>=(myNumber-1)){
 		dataFile.write(myAccbinint, myNumber);
 		dataFile.close();
+		Serial.println("done with array");
 	};
 }
 
 void deleteSDFile(){
 	SD.remove(fileName);
+	SD.remove(targetName);
 	dataFile = SD.open(fileName, FILE_WRITE);
+	dataTarget = SD.open(targetName, FILE_WRITE);
 	dataFile.close();
+	dataTarget.close();
 }
 
 
@@ -488,59 +394,6 @@ void setupRTC(){
 	Serial.println("Start time: " + getCurrentDateAndTime());
 }
 
-void waitForSetupRTCWithSerial(){
-	Serial.print("Type the current time in this format: yymmddhhmmss");
-	//Format:  yymmddhhmmss
-	uint8_t counter = 0;
-	uint8_t previousNum =0;
-	while(!receivedSerialTime){
-		// send data only when you receive data:
-		if (Serial.available() > 0) {
-			counter++;
-			// read the incoming byte:
-			uint8_t incomingByte;
-			incomingByte = Serial.read()-48;
-
-
-			//odd number
-			if (counter&1) {
-				incomingByte = incomingByte*10;
-			}
-
-			//Save year:
-			if (counter*(counter-1) == 2) {
-				rtc.setYear(incomingByte+previousNum);
-			}
-			//Save month:
-			if (counter*(counter-1) == 12) {
-				rtc.setMonth(incomingByte+previousNum);
-			}
-			//Save day:
-			if (counter*(counter-1) == 30) {
-				rtc.setDay(incomingByte+previousNum);
-			}
-			//Save hours:
-			if (counter*(counter-1) == 56) {
-				rtc.setHours(incomingByte+previousNum);
-			}
-			//Save minutes:
-			if (counter*(counter-1) == 90) {
-				rtc.setMinutes(incomingByte+previousNum);
-			}
-			//Save seconds:
-			if (counter*(counter-1) == 132) {
-				rtc.setSeconds(incomingByte+previousNum);
-			}
-			previousNum = incomingByte;
-		}
-		if (counter == 12){
-			receivedSerialTime = true;
-		}
-
-
-	}
-
-}
 
 
 String getCurrentTime(){
@@ -623,6 +476,7 @@ void setTimerFrequency(int frequencyHz) {
 	// to prevent any jitter or disconnect when changing the compare value.
 	TC->COUNT.reg = map(TC->COUNT.reg, 0, TC->CC[0].reg, 0, compareValue);
 	TC->CC[0].reg = compareValue;
+
 	while (TC->STATUS.bit.SYNCBUSY == 1);
 }
 
@@ -698,27 +552,3 @@ void TC3_Handler() {
 	TC->INTFLAG.bit.MC0 = 1;
 }
 
-//Interrupt functions
-//A2 pin  (Pin number: 16)
-void start_stopRecordInterrupt(){
-	unsigned long interrupt_time = millis();
-	if (interrupt_time - last_interrupt_timeRecord > DEBOUNCE_TIME) {
-		if (CurrState == StateRecord) {
-			setStandbyState();
-		}else if (CurrState == StateStandby) {
-			setRecordState();
-		}
-	}
-	last_interrupt_timeRecord = interrupt_time;
-
-}
-//A3 pin  (Pin number: 17)
-void startCalibration(){
-	unsigned long interrupt_time = millis();
-	if (interrupt_time - last_interrupt_timeCalib > DEBOUNCE_TIME) {
-		if (CurrState == StateStandby) {
-			setCalibrationState();
-		}
-	}
-	last_interrupt_timeCalib = interrupt_time;
-}
