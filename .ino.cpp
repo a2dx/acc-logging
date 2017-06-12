@@ -2,14 +2,14 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-12 15:52:49
+//This file has been generated on 2017-06-13 01:36:16
 
 #include "Arduino.h"
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_LIS3DH.h>
 #include <Adafruit_Sensor.h>
-#define LIS3DH_CS 15
+#define LIS3DH_CS 1
 #define CLICKTHRESHHOLD 50
 #include <math.h>
 #define CPU_HZ 48000000
@@ -37,6 +37,12 @@ void goSleep();
 void wakeUp();
 void setupInterrupt();
 void setupLED();
+void ledRecordOn();
+void ledRecordOff();
+void ledCalibrationOn();
+void ledCalibrationOff();
+void ledBatteryOn();
+void ledBatteryOff();
 void ledRedOn();
 void ledRedOff();
 void ledGreenOn();
@@ -53,11 +59,13 @@ void writeSDStringln(String str);
 void readSD();
 void safeBufferCounterToSD();
 void writeSensorStrDataToSD();
+void writeSensorIntDataToSD();
 void writeSensorBinToArray();
 void deleteSDFile();
 void setupRTC();
 void waitForSetupRTCWithSerial();
 String getCurrentTime();
+String getCurrentDateTimeFilename();
 String getCurrentDate();
 String getCurrentDateAndTime();
 float getBatteryVoltage();

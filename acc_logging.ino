@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <Adafruit_LIS3DH.h>
 #include <Adafruit_Sensor.h>
-#define LIS3DH_CS 15
+#define LIS3DH_CS 1
 #define CLICKTHRESHHOLD 50
 sensors_event_t myEvent;
 
@@ -20,7 +20,7 @@ sensors_event_t myEvent;
 #include <SD.h>
 #define SD_CS 4
 File dataFile;
-String fileName = "accLog2.txt";
+String fileName = "ACCLOG.bin";
 
 //Real Time Clock
 #include "RTCZero.h"
@@ -51,6 +51,7 @@ uint8_t currentError = 0;
 //LED Error blink
 #define errLIS3DH 1
 #define errNoSD 2
+#define errUnknown 3
 //-------------------------
 
 //-----Initialisation-------
@@ -67,11 +68,15 @@ uint8_t click;
 #define StateError 3
 uint8_t CurrState = 0;     //0 = Standby  // 1 = Calibration // 2 = record //  3 = error
 
-//------buttons-----
-#define interruptPinRecord 16   //A2    (Start/Stop Record)
-#define interruptPinCalibration 17    //A3  (calibration)
+//------pin definition-----
+#define interruptPinRecord 15   //A1    (Start/Stop Record)
+#define interruptPinCalibration 16    //A2  (calibration)
+#define LEDRecord 17
+#define LEDCalibration 18
+#define LEDBattery 19
 
-const unsigned int DEBOUNCE_TIME = 300;
+//------buttons-----
+const unsigned int DEBOUNCE_TIME = 400;
 
 unsigned int counterButton = 0;
 static unsigned long last_interrupt_timeRecord = 0;
@@ -94,8 +99,11 @@ uint8_t myYbinA = 0;
 uint8_t myYbinB = 0;
 uint8_t myZbinA = 0;
 uint8_t myZbinB = 0;
-const uint32_t myNumber = 6000;  //some value for the counter
+const uint32_t myNumber = 60;  //some value for the counter
 uint8_t myAccbinint[myNumber];
+uint8_t myAccbinintSD[myNumber];
+bool writeSD = false;
+String testFileName = "";
 
 //-----Calibration-------
 uint16_t counterCalibration = 0;
@@ -114,13 +122,13 @@ void setup() {
 	setupSerial();
 	setupLIS3DH();
 	//	setupLIS3DHClick();    //only a test, needs some improvement
-	//setupSD();
+	setupSD();
 	setupRTC();
 
-	//	deleteSDFile();
-	//	dataFile = SD.open(fileName, FILE_WRITE);
-	//	readSD();
 
+	deleteSDFile();
+	dataFile = SD.open(fileName, FILE_WRITE);
+	dataFile.close();
 
 	//Green LED, setup finished
 	ledRedOff();
@@ -129,10 +137,13 @@ void setup() {
 
 	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
 
-	waitForSetupRTCWithSerial();
-	Serial.println("My new Time: " + getCurrentDateAndTime());
+	//waitForSetupRTCWithSerial();
+	//Serial.println("My new Time: " + getCurrentDateAndTime());
 	setStandbyState();
 	//setCalibrationState();
+
+
+
 }
 
 void loop() {
@@ -153,7 +164,9 @@ void loop() {
 
 	//time to wake up  (needed for buttons)
 	delay(300);
+	ledBatteryOn();
 	goSleep();
+	ledBatteryOff();
 	ledRedOff();
 	//time to wake up  (needed for buttons)
 	delay(300);
@@ -167,15 +180,42 @@ void loop() {
 
 
 void startRecord(){
+	delay(300);
 	Serial.println("Start record at: " + getCurrentTime());
-	ledGreenOn();
-	startTimer(5);
+	ledRecordOn();
+	startTimer(10);
+
+
+	//String myfileName = getCurrentDateTimeFilename();
+
+
 	while (CurrState == StateRecord){
-		readAcc();
-		//writeSensorBinToArray();
+		//calcAccMedian()
+		delay(10);
+		if(writeSD){
+			writeSD = false;
+			//Serial.println("Array full");
+			//counter = 0;
+			for (uint16_t var = 0; var < myNumber; var++) {
+				myAccbinintSD[var] = myAccbinint[var];
+			}
+			//Serial.println("writing array.... ");
+			ledGreenOn();
+			dataFile = SD.open(fileName,FILE_WRITE);
+			Serial.println("Filename: " + String(dataFile.name()));
+			dataFile.write(myAccbinintSD, myNumber);
+			dataFile.close();
+			ledGreenOff();
+		}
+		//		//writeSensorBinToArray();
 	}
-	disableTimer();
+	delay(500);
 	ledGreenOff();
+	disableTimer();
+
+	setStandbyState();
+
+	ledRecordOff();
 }
 
 
@@ -184,7 +224,7 @@ void startRecord(){
 void calibration(){
 	//Calibration Code
 
-
+	ledCalibrationOn();
 	accSensor.setRange(LIS3DH_RANGE_2_G);
 
 	Serial.println("Iam Calibrating");
@@ -212,6 +252,8 @@ void calibration(){
 	//After finished calibration
 
 	accSensor.setRange(LIS3DH_RANGE_16_G);
+	delay(5000);
+	ledCalibrationOff();
 	setStandbyState();
 }
 
@@ -323,26 +365,43 @@ void setupInterrupt(){
 void setupLED(){
 	pinMode(ledGreen, OUTPUT);
 	pinMode(ledRed, OUTPUT);
+	pinMode(LEDCalibration, OUTPUT);
+	pinMode(LEDRecord, OUTPUT);
+	pinMode(LEDBattery, OUTPUT);
 }
 
+//------LED-----
+void ledRecordOn(){
+	digitalWrite(LEDRecord, HIGH);
+}
+void ledRecordOff(){
+	digitalWrite(LEDRecord, LOW);
+}
+void ledCalibrationOn(){
+	digitalWrite(LEDCalibration, HIGH);
+}
+void ledCalibrationOff(){
+	digitalWrite(LEDCalibration, LOW);
+}
+void ledBatteryOn(){
+	digitalWrite(LEDBattery, HIGH);
+}
+void ledBatteryOff(){
+	digitalWrite(LEDBattery, LOW);
+}
 void ledRedOn(){
 	digitalWrite(ledRed, HIGH);
-
 }
 void ledRedOff(){
 	digitalWrite(ledRed, LOW);
 }
-
-
 void ledGreenOn(){
 	digitalWrite(ledGreen, HIGH);
 }
-
 void ledGreenOff(){
 	digitalWrite(ledGreen, LOW);
-
 }
-
+//----------------------
 
 //Plot in Sloeber via Serial USB
 void plotSerial(int16_t plotValue){
@@ -394,6 +453,9 @@ void setupLIS3DH(){
 //Read sensor data
 void readAcc(){
 	accSensor.read();
+	myX = accSensor.x;
+	myY = accSensor.y;
+	myZ = accSensor.z;
 }
 
 
@@ -453,14 +515,21 @@ void writeSensorStrDataToSD(){
 
 }
 
-void writeSensorBinToArray(){
+void writeSensorIntDataToSD(){
 	accSensor.read();
-	myXbinA= accSensor.x >> 8;
-	myXbinB= accSensor.x & 0x00FF;
-	myYbinA= accSensor.y >> 8;
-	myYbinB= accSensor.y & 0x00FF;
-	myZbinA= accSensor.z >> 8;
-	myZbinB= accSensor.z & 0x00FF;
+	accSensor.getEvent(&myEvent);
+	writeSDStringln(String(accSensor.x) + "," + String(accSensor.y) + "," + String(accSensor.z));
+
+}
+
+void writeSensorBinToArray(){
+	readAcc();
+	myXbinA= myX >> 8;
+	myXbinB= myX & 0x00FF;
+	myYbinA= myY >> 8;
+	myYbinB= myY & 0x00FF;
+	myZbinA= myZ >> 8;
+	myZbinB= myZ & 0x00FF;
 	myAccbinint [0+counter] = myXbinA;
 	myAccbinint [1+counter] = myXbinB;
 	myAccbinint [2+counter] = myYbinA;
@@ -468,10 +537,14 @@ void writeSensorBinToArray(){
 	myAccbinint [4+counter] = myZbinA;
 	myAccbinint [5+counter] = myZbinB;
 	counter += 6 ;
-	if(counter>=(myNumber-1)){
-		dataFile.write(myAccbinint, myNumber);
-		dataFile.close();
-	};
+	if (counter+5 >= myNumber) {
+		counter = 0;
+		writeSD = true;
+	}
+	//	if(counter>=(myNumber-1)){
+	//		dataFile.write(myAccbinint, myNumber);
+	//		dataFile.close();
+	//	};
 }
 
 void deleteSDFile(){
@@ -487,6 +560,8 @@ void setupRTC(){
 	rtc.setDate(day, month, year);
 	Serial.println("Start time: " + getCurrentDateAndTime());
 }
+
+
 
 void waitForSetupRTCWithSerial(){
 	Serial.print("Type the current time in this format: yymmddhhmmss");
@@ -563,6 +638,48 @@ String getCurrentTime(){
 	str = "";
 
 	return myTime;
+}
+
+String getCurrentDateTimeFilename(){
+	String str = "";
+	String myTime = "";
+	currHour = rtc.getHours();
+	currMinute = rtc.getMinutes();
+	currSecond = rtc.getSeconds();
+
+	if (currHour < 10) str = "0";
+	myTime += str + currHour;
+	str = "";
+
+	if (currMinute < 10) str = "0";
+	myTime += str + currMinute;
+	str = "";
+
+	if (currSecond < 10) str = "0";
+	myTime += str + currSecond;
+	str = "";
+
+	String myDate = "";
+	currYear = rtc.getYear();
+	currMonth = rtc.getMonth();
+	currDay = rtc.getDay();
+
+	if (currDay < 10) str = "0";
+	myDate += str + currDay ;
+	str = "";
+
+	if (currMonth < 10) str = "0";
+	myDate += str + currMonth;
+	str = "";
+
+	if (currYear < 10) str = "0";
+	myDate += str + currYear;
+	str = "";
+
+	//String complete = "ACC"+ myDate +"_"+ myTime +".dat";
+	String complete = "ACC" + myTime +".dat";
+
+	return complete;
 }
 
 String getCurrentDate(){
@@ -684,14 +801,35 @@ void TC3_Handler() {
 
 
 	// INterrupt function here!!!
-	if(state == true) {
-		//digitalWrite(LED_PIN,HIGH);
-		ledGreenOn();
-	} else {
-		ledGreenOff();
-		//digitalWrite(LED_PIN,LOW);
+	readAcc();
+	myXbinA= myX >> 8;
+	myXbinB= myX & 0x00FF;
+	myYbinA= myY >> 8;
+	myYbinB= myY & 0x00FF;
+	myZbinA= myZ >> 8;
+	myZbinB= myZ & 0x00FF;
+	myAccbinint [0+counter] = myXbinA;
+	myAccbinint [1+counter] = myXbinB;
+	myAccbinint [2+counter] = myYbinA;
+	myAccbinint [3+counter] = myYbinB;
+	myAccbinint [4+counter] = myZbinA;
+	myAccbinint [5+counter] = myZbinB;
+	counter += 6 ;
+	if (counter+5 >= myNumber) {
+		counter = 0;
+		writeSD = true;
 	}
-	state = !state;
+	//
+	//
+	//
+	//	if(state == true) {
+	//		//digitalWrite(LED_PIN,HIGH);
+	//		ledGreenOn();
+	//	} else {
+	//		ledGreenOff();
+	//		//digitalWrite(LED_PIN,LOW);
+	//	}
+	//	state = !state;
 	//---------------------
 
 
