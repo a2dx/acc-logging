@@ -51,7 +51,7 @@ uint8_t currentError = 0;
 #define errNoSD 2
 //-------------------------
 
-//Initialisation
+//-----Initialisation-------
 Adafruit_LIS3DH accSensor = Adafruit_LIS3DH(LIS3DH_CS);
 uint8_t click;
 #if defined(ARDUINO_ARCH_SAMD)
@@ -59,18 +59,26 @@ uint8_t click;
 #endif
 #define ledGreen 8
 #define ledRed 13
-#define interruptPinRecord 16
 #define StateStandby 0
 #define StateCalibration 1
 #define StateRecord 2
 #define StateError 3
 uint8_t CurrState = 0;     //0 = Standby  // 1 = Calibration // 2 = record //  3 = error
 
-//Timer
+//------buttons-----
+#define interruptPinRecord 16   //A2    (Start/Stop Record)
+#define interruptPinCalibration 17    //A3  (calibration)
+
+const unsigned int DEBOUNCE_TIME = 300;
+
+unsigned int counterButton = 0;
+static unsigned long last_interrupt_timeRecord = 0;
+static unsigned long last_interrupt_timeCalib = 0;
+//-----Timer-----
 uint16_t sampleRate = 50; //Sample Rate of the record
 bool state = 0; //timer test
 
-//Variables
+//----Variables-----
 String xString = "";
 String yString = "";
 String zString = "";
@@ -87,7 +95,7 @@ uint8_t myZbinB = 0;
 const uint32_t myNumber = 6000;  //some value for the counter
 uint8_t myAccbinint[myNumber];
 
-//Calibration
+//-----Calibration-------
 uint16_t counterCalibration = 0;
 const uint16_t counterCalibrationMax = 5000;
 int16_t calibXMed = 0;
@@ -103,30 +111,30 @@ void setup() {
 	//setupSerial();
 	setupLIS3DH();
 	//	setupLIS3DHClick();    //only a test, needs some improvement
-	setupSD();
+	//setupSD();
 	setupRTC();
 
-	deleteSDFile();
-	dataFile = SD.open(fileName, FILE_WRITE);
-	readSD();
+	//	deleteSDFile();
+	//	dataFile = SD.open(fileName, FILE_WRITE);
+	//	readSD();
 
 
 	//Green LED, setup finished
 	ledRedOff();
-	ledGreenOn();
+	ledGreenOff();
 
 
-	startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
+	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
 
-
+	setStandbyState();
 
 }
 
 void loop() {
+
 	//Recording
 	if (CurrState == StateRecord) {
 		startRecord();
-
 	}
 	//Calibration
 	if (CurrState == StateCalibration) {
@@ -138,25 +146,46 @@ void loop() {
 		error(currentError);
 	}
 
-	//Wake up with the next interrupt
-	//goSleep();
+	//time to wake up  (needed for buttons)
+	delay(300);
+	goSleep();
+	ledRedOff();
+	//time to wake up  (needed for buttons)
+	delay(300);
+
+	//Power Optimisation reset
+	accSensor.setDataRate(LIS3DH_DATARATE_400_HZ);
+	//-----------
 
 
 }
 
 
 void startRecord(){
-
-
+	Serial.println("Start record at: " + getCurrentTime());
+	ledGreenOn();
+	startTimer(5);
+	while (CurrState == StateRecord){
+		readAcc();
+		//writeSensorBinToArray();
+	}
+	disableTimer();
+	ledGreenOff();
 }
 
 
 
 
 void calibration(){
+	//Calibration Code
+	Serial.println("Iam Calibrating");
 	calcAccMedian();
 
+	//----not finished----------
 
+
+	//After finished calibration
+	setStandbyState();
 }
 
 double calcAngleEarth_XY(int vektor[3]){
@@ -203,8 +232,11 @@ void setStandbyState(){
 
 
 void goSleep(){
+
+	//Power Optimisation
+	accSensor.setDataRate(LIS3DH_DATARATE_POWERDOWN);
 	Serial.println("Going to sleep at: " + getCurrentTime());
-	ledGreenOff();
+	ledRedOn();
 	SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 	__WFI();
 }
@@ -216,8 +248,19 @@ void wakeUp(){
 }
 
 void setupInterrupt(){
+	//pinMode(interruptPinRecord, INPUT_PULLUP);
+	//attachInterrupt(interruptPinRecord,wakeUp, LOW);
+
+	//Start/Stop Record
 	pinMode(interruptPinRecord, INPUT_PULLUP);
-	attachInterrupt(interruptPinRecord,wakeUp, LOW);
+	//digitalWrite(interruptPinRecord, HIGH);
+	attachInterrupt(interruptPinRecord,start_stopRecordInterrupt, LOW);
+
+	//Start calibration
+	pinMode(interruptPinCalibration, INPUT_PULLUP);
+	//digitalWrite(interruptPinRecord, HIGH);
+	attachInterrupt(interruptPinCalibration,startCalibration, LOW);
+
 }
 
 
@@ -471,8 +514,6 @@ void setTimerFrequency(int frequencyHz) {
 	// to prevent any jitter or disconnect when changing the compare value.
 	TC->COUNT.reg = map(TC->COUNT.reg, 0, TC->CC[0].reg, 0, compareValue);
 	TC->CC[0].reg = compareValue;
-	Serial.println(TC->COUNT.reg);
-	Serial.println(TC->CC[0].reg);
 	while (TC->STATUS.bit.SYNCBUSY == 1);
 }
 
@@ -548,3 +589,27 @@ void TC3_Handler() {
 	TC->INTFLAG.bit.MC0 = 1;
 }
 
+//Interrupt functions
+//A2 pin  (Pin number: 16)
+void start_stopRecordInterrupt(){
+	unsigned long interrupt_time = millis();
+	if (interrupt_time - last_interrupt_timeRecord > DEBOUNCE_TIME) {
+		if (CurrState == StateRecord) {
+			setStandbyState();
+		}else if (CurrState == StateStandby) {
+			setRecordState();
+		}
+	}
+	last_interrupt_timeRecord = interrupt_time;
+
+}
+//A3 pin  (Pin number: 17)
+void startCalibration(){
+	unsigned long interrupt_time = millis();
+	if (interrupt_time - last_interrupt_timeCalib > DEBOUNCE_TIME) {
+		if (CurrState == StateStandby) {
+			setCalibrationState();
+		}
+	}
+	last_interrupt_timeCalib = interrupt_time;
+}

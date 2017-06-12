@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-11 20:49:05
+//This file has been generated on 2017-06-12 02:07:45
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -62,6 +62,8 @@ void startTimer(int frequencyHz) ;
 void disableTimer() ;
 void resetTimer() ;
 void TC3_Handler() ;
+void start_stopRecordInterrupt();
+void startCalibration();
 
 #include "acc_logging.ino"
 
