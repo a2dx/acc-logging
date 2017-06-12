@@ -30,7 +30,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/simplot}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/Adafruit_ASFcore-master 2}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1058711910" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -47,7 +46,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/simplot}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/Adafruit_ASFcore-master 2}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.44230718" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -64,7 +62,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/RTCZero/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/simplot}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/acc_logging/libraries/Adafruit_ASFcore-master 2}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.1279945626" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

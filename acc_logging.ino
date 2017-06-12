@@ -101,14 +101,15 @@ const uint16_t counterCalibrationMax = 5000;
 int16_t calibXMed = 0;
 int16_t calibYMed = 0;
 int16_t calibZMed = 0;
-
+double rotAngleX = 0;
+double rotAngleY = 0;
 
 int test = 0;
 /////////////////////////////////
 void setup() {
 	setupLED();
 	setupInterrupt();
-	//setupSerial();
+	setupSerial();
 	setupLIS3DH();
 	//	setupLIS3DHClick();    //only a test, needs some improvement
 	//setupSD();
@@ -127,7 +128,7 @@ void setup() {
 	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
 
 	setStandbyState();
-
+	//setCalibrationState();
 }
 
 void loop() {
@@ -178,26 +179,81 @@ void startRecord(){
 
 void calibration(){
 	//Calibration Code
+
+
+	accSensor.setRange(LIS3DH_RANGE_2_G);
+
 	Serial.println("Iam Calibrating");
 	calcAccMedian();
+	Serial.println("Old x: " + String(calibXMed));
+	Serial.println("Old y: " + String(calibYMed));
+	Serial.println("Old z: " + String(calibZMed));
+	int earthVector[3] = {calibXMed,calibYMed,calibZMed};
 
-	//----not finished----------
+	calcAngleEarth_ZX(earthVector);
+	calcAngleEarth_ZY(earthVector);
 
+	Serial.println("RotAngleX: " + String(radianToDegree(rotAngleX)));
+	Serial.println("RotAngleY: " + String(radianToDegree(rotAngleY)));
+	rotationX(earthVector[0],earthVector[1],earthVector[2]);
+	earthVector[0] = calibXMed;
+	earthVector[1] = calibYMed;
+	earthVector[2] = calibZMed;
+	rotationY(earthVector[0],earthVector[1],earthVector[2]);
+
+	Serial.println("new x: " + String(calibXMed));
+	Serial.println("new y: " + String(calibYMed));
+	Serial.println("new z: " + String(calibZMed));
 
 	//After finished calibration
+
+	accSensor.setRange(LIS3DH_RANGE_16_G);
 	setStandbyState();
 }
 
-double calcAngleEarth_XY(int vektor[3]){
-	return 0; //---------------NOT FINISHED---------
-
+double radianToDegree(double rad){
+	return rad*180/PI;
 }
+
+void rotationX(int16_t x,int16_t y,int16_t z){
+
+	double myCos = cos(rotAngleX);
+	double mySin = sin(rotAngleX);
+
+	calibYMed = ((double)y)*myCos - ((double)z)*mySin;
+	calibZMed = ((double)y)*mySin + ((double)z)*myCos;
+}
+
+void rotationY(int16_t x,int16_t y,int16_t z){
+
+	double myCos = cos(rotAngleY);
+	double mySin = sin(rotAngleY);
+
+	calibXMed = ((double)x)*myCos + ((double)z)*mySin;
+	calibZMed = -((double)x)*mySin +((double)z)*myCos;
+}
+
+
+void calcAngleEarth_ZX(int vectorEarth[3]){
+	int vectorZ[3] = {0,1,0};
+	rotAngleX = calcAngle(vectorEarth, vectorZ);
+}
+
+void calcAngleEarth_ZY(int vectorEarth[3]){
+	int vectorZ[3] = {1,0,0};
+	rotAngleY = calcAngle(vectorEarth, vectorZ);
+}
+
 
 double calcAngle(int vektor1[3],int vektor2[3]){
 	int skalar = vektor1[0]*vektor2[0] + vektor1[1]*vektor2[1] +vektor1[2]*vektor2[2];
-	int length1 = sqrt(vektor1[0]*vektor1[0]+vektor1[1]*vektor1[1]+vektor1[3]*vektor1[3]);
-	int length2 = sqrt(vektor2[0]*vektor2[0]+vektor2[1]*vektor2[1]+vektor2[3]*vektor2[3]);
+	double length1 = sqrt(vektor1[0]*vektor1[0]+vektor1[1]*vektor1[1]+vektor1[2]*vektor1[2]);
+	double length2 = sqrt(vektor2[0]*vektor2[0]+vektor2[1]*vektor2[1]+vektor2[2]*vektor2[2]);
 	double result = (double)skalar/(length1*length2);
+//	Serial.println("Length2: "+ String(length1));
+//	Serial.println("Length1: "+ String(length2));
+//	Serial.println("Skalar: "+ String(skalar));
+//	Serial.println(String(result));
 	return asin(result);
 }
 
@@ -248,17 +304,13 @@ void wakeUp(){
 }
 
 void setupInterrupt(){
-	//pinMode(interruptPinRecord, INPUT_PULLUP);
-	//attachInterrupt(interruptPinRecord,wakeUp, LOW);
 
 	//Start/Stop Record
 	pinMode(interruptPinRecord, INPUT_PULLUP);
-	//digitalWrite(interruptPinRecord, HIGH);
 	attachInterrupt(interruptPinRecord,start_stopRecordInterrupt, LOW);
 
 	//Start calibration
 	pinMode(interruptPinCalibration, INPUT_PULLUP);
-	//digitalWrite(interruptPinRecord, HIGH);
 	attachInterrupt(interruptPinCalibration,startCalibration, LOW);
 
 }

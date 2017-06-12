@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-12 02:07:45
+//This file has been generated on 2017-06-12 13:09:17
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -22,7 +22,11 @@ void setup() ;
 void loop() ;
 void startRecord();
 void calibration();
-double calcAngleEarth_XY(int vektor[3]);
+double radianToDegree(double rad);
+void rotationX(int16_t x,int16_t y,int16_t z);
+void rotationY(int16_t x,int16_t y,int16_t z);
+void calcAngleEarth_ZX(int vectorEarth[3]);
+void calcAngleEarth_ZY(int vectorEarth[3]);
 double calcAngle(int vektor1[3],int vektor2[3]);
 void calcAccMedian();
 void setRecordState();
