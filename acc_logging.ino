@@ -44,6 +44,8 @@ uint8_t currYear = year;
 uint8_t currMonth = month;
 uint8_t currDay = day;
 
+bool receivedSerialTime = false;
+
 //--------ErrorNum---------
 uint8_t currentError = 0;
 //LED Error blink
@@ -127,6 +129,8 @@ void setup() {
 
 	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
 
+	waitForSetupRTCWithSerial();
+	Serial.println("My new Time: " + getCurrentDateAndTime());
 	setStandbyState();
 	//setCalibrationState();
 }
@@ -250,10 +254,10 @@ double calcAngle(int vektor1[3],int vektor2[3]){
 	double length1 = sqrt(vektor1[0]*vektor1[0]+vektor1[1]*vektor1[1]+vektor1[2]*vektor1[2]);
 	double length2 = sqrt(vektor2[0]*vektor2[0]+vektor2[1]*vektor2[1]+vektor2[2]*vektor2[2]);
 	double result = (double)skalar/(length1*length2);
-//	Serial.println("Length2: "+ String(length1));
-//	Serial.println("Length1: "+ String(length2));
-//	Serial.println("Skalar: "+ String(skalar));
-//	Serial.println(String(result));
+	//	Serial.println("Length2: "+ String(length1));
+	//	Serial.println("Length1: "+ String(length2));
+	//	Serial.println("Skalar: "+ String(skalar));
+	//	Serial.println(String(result));
 	return asin(result);
 }
 
@@ -484,6 +488,59 @@ void setupRTC(){
 	Serial.println("Start time: " + getCurrentDateAndTime());
 }
 
+void waitForSetupRTCWithSerial(){
+	Serial.print("Type the current time in this format: yymmddhhmmss");
+	//Format:  yymmddhhmmss
+	uint8_t counter = 0;
+	uint8_t previousNum =0;
+	while(!receivedSerialTime){
+		// send data only when you receive data:
+		if (Serial.available() > 0) {
+			counter++;
+			// read the incoming byte:
+			uint8_t incomingByte;
+			incomingByte = Serial.read()-48;
+
+
+			//odd number
+			if (counter&1) {
+				incomingByte = incomingByte*10;
+			}
+
+			//Save year:
+			if (counter*(counter-1) == 2) {
+				rtc.setYear(incomingByte+previousNum);
+			}
+			//Save month:
+			if (counter*(counter-1) == 12) {
+				rtc.setMonth(incomingByte+previousNum);
+			}
+			//Save day:
+			if (counter*(counter-1) == 30) {
+				rtc.setDay(incomingByte+previousNum);
+			}
+			//Save hours:
+			if (counter*(counter-1) == 56) {
+				rtc.setHours(incomingByte+previousNum);
+			}
+			//Save minutes:
+			if (counter*(counter-1) == 90) {
+				rtc.setMinutes(incomingByte+previousNum);
+			}
+			//Save seconds:
+			if (counter*(counter-1) == 132) {
+				rtc.setSeconds(incomingByte+previousNum);
+			}
+			previousNum = incomingByte;
+		}
+		if (counter == 12){
+			receivedSerialTime = true;
+		}
+
+
+	}
+
+}
 
 
 String getCurrentTime(){
