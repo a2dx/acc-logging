@@ -20,7 +20,9 @@ sensors_event_t myEvent;
 #include <SD.h>
 #define SD_CS 4
 File dataFile;
-String fileName = "ACCLOG.bin";
+File dataTarget;
+String fileName = "accraw77.dat";
+String targetName ="acclog88.csv";
 
 //Real Time Clock
 #include "RTCZero.h"
@@ -128,6 +130,7 @@ void setup() {
 
 	deleteSDFile();
 	dataFile = SD.open(fileName, FILE_WRITE);
+	//dataTarget = SD.open(targetName, FILE_WRITE);
 	dataFile.close();
 
 	//Green LED, setup finished
@@ -202,14 +205,26 @@ void startRecord(){
 			//Serial.println("writing array.... ");
 			ledGreenOn();
 			dataFile = SD.open(fileName,FILE_WRITE);
-			Serial.println("Filename: " + String(dataFile.name()));
 			dataFile.write(myAccbinintSD, myNumber);
 			dataFile.close();
 			ledGreenOff();
 		}
 		//		//writeSensorBinToArray();
 	}
+	Serial.println("Filename: " + String(dataFile.name()));
+
 	delay(500);
+	dataFile.close();
+	dataTarget = SD.open(targetName, FILE_WRITE);
+	dataFile = SD.open(fileName);
+
+	Serial.println("hello ");
+	copyDatToCsv();
+	Serial.println("hello -----");
+
+	dataFile.close();
+	dataTarget.close();
+
 	ledGreenOff();
 	disableTimer();
 
@@ -547,10 +562,43 @@ void writeSensorBinToArray(){
 	//	};
 }
 
+void copyDatToCsv(){
+	uint8_t x1csv;
+	uint8_t x2csv;
+	uint8_t y1csv;
+	uint8_t y2csv;
+	uint8_t z1csv;
+	uint8_t z2csv;
+	uint16_t xcsv;
+	uint16_t ycsv;
+	uint16_t zcsv;
+
+	//Serial.println("Size: " + String(dataFile.size());
+	while(dataFile.available()){
+		//Serial.printl("Position:" String(dataFile.position());
+		x1csv = dataFile.read();
+		x2csv = dataFile.read();
+		y1csv = dataFile.read();
+		y2csv = dataFile.read();
+		z1csv = dataFile.read();
+		z2csv = dataFile.read();
+		xcsv = ((uint16_t)x1csv << 8)|(x2csv & 0xFF);
+		ycsv = ((uint16_t)y1csv << 8)|(y2csv & 0xFF);
+		zcsv = ((uint16_t)z1csv << 8)|(z2csv & 0xFF);
+		dataTarget.println((String)xcsv + "," + (String)ycsv + "," + (String)zcsv);
+	}
+	Serial.println("done writing csv file");
+}
+
+
+
 void deleteSDFile(){
 	SD.remove(fileName);
+	SD.remove(targetName);
 	dataFile = SD.open(fileName, FILE_WRITE);
+	dataTarget = SD.open(targetName, FILE_WRITE);
 	dataFile.close();
+	dataTarget.close();
 }
 
 
