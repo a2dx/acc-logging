@@ -21,8 +21,13 @@ sensors_event_t myEvent;
 #define SD_CS 4
 File dataFile;
 File dataTarget;
-String fileName = "accraw77.dat";
+
+
+String fileName = "accraw47.csv";
 String targetName ="acclog88.csv";
+
+//const String fileName = "testrec77.dat";
+//const String targetName ="testrec32.csv";
 
 //Real Time Clock
 #include "RTCZero.h"
@@ -84,7 +89,7 @@ unsigned int counterButton = 0;
 static unsigned long last_interrupt_timeRecord = 0;
 static unsigned long last_interrupt_timeCalib = 0;
 //-----Timer-----
-uint16_t sampleRate = 50; //Sample Rate of the record
+uint16_t sampleRate = 400; //Sample Rate of the record
 bool state = 0; //timer test
 
 //----Variables-----
@@ -101,11 +106,12 @@ uint8_t myYbinA = 0;
 uint8_t myYbinB = 0;
 uint8_t myZbinA = 0;
 uint8_t myZbinB = 0;
-const uint32_t myNumber = 60;  //some value for the counter
+const uint32_t myNumber = 300;  //some value for the counter
 uint8_t myAccbinint[myNumber];
 uint8_t myAccbinintSD[myNumber];
 bool writeSD = false;
 String testFileName = "";
+uint8_t recordcounter = 0;
 
 //-----Calibration-------
 uint16_t counterCalibration = 0;
@@ -128,24 +134,20 @@ void setup() {
 	setupRTC();
 
 
-	deleteSDFile();
-	dataFile = SD.open(fileName, FILE_WRITE);
+	//deleteSDFile();
+	//dataFile = SD.open(fileName, FILE_WRITE);
 	//dataTarget = SD.open(targetName, FILE_WRITE);
-	dataFile.close();
+	//dataFile.close();
 
 	//Green LED, setup finished
 	ledRedOff();
 	ledGreenOff();
 
 
-	//startTimer(30);   //Only a test for the timer with 30 Hz (green LED blinking)
-
 	//waitForSetupRTCWithSerial();
-	//Serial.println("My new Time: " + getCurrentDateAndTime());
+	Serial.println("My new Time: " + getCurrentDateAndTime());
+	//setupAkkuCheck();
 	setStandbyState();
-	//setCalibrationState();
-
-
 
 }
 
@@ -183,54 +185,104 @@ void loop() {
 
 
 void startRecord(){
-	delay(300);
-	Serial.println("Start record at: " + getCurrentTime());
+
 	ledRecordOn();
-	startTimer(10);
+
+	//fileName = "REC" + String(recordcounter) + ".csv";
+	fileName = getCurrentDateTimeFilename();
+	dataFile = SD.open(fileName,FILE_WRITE);
+	String xRot = String(radianToDegree(rotAngleX));
+	String yRot = String(radianToDegree(rotAngleY));
+
+	String firstLine = "Format: x,y,z ---- Start at: " + getCurrentTime() + "   SampleRate: "
+			+ String(sampleRate) + "Hz    Calibration AngleX: "
+			+ xRot + "°     Calibration AngleY"   + yRot;
+
+	dataFile.println(firstLine);
+
+	Serial.println("Filename: " + String(dataFile.name()));
+	Serial.println("Start record at: " + getCurrentTime());
+	delay(10);
+
+
+	startTimer(sampleRate);
+
+
 
 
 	//String myfileName = getCurrentDateTimeFilename();
 
 
+
 	while (CurrState == StateRecord){
-		//calcAccMedian()
-		delay(10);
-		if(writeSD){
-			writeSD = false;
-			//Serial.println("Array full");
-			//counter = 0;
-			for (uint16_t var = 0; var < myNumber; var++) {
-				myAccbinintSD[var] = myAccbinint[var];
-			}
-			//Serial.println("writing array.... ");
+
+		if(state == true) {
+			//digitalWrite(LED_PIN,HIGH);
 			ledGreenOn();
-			dataFile = SD.open(fileName,FILE_WRITE);
-			dataFile.write(myAccbinintSD, myNumber);
-			dataFile.close();
+		} else {
 			ledGreenOff();
+			//digitalWrite(LED_PIN,LOW);
 		}
-		//		//writeSensorBinToArray();
+		state = !state;
+
+
+
+		//		if(writeSD){
+		//			writeSD = false;
+		//			//Serial.println("Array full");
+		//			//counter = 0;
+		//			for (uint16_t var = 0; var < myNumber; var++) {
+		//				myAccbinintSD[var] = myAccbinint[var];
+		//			}
+		//			//Serial.println("writing array.... ");
+		//			ledGreenOn();
+		//
+		//			dataFile.write(myAccbinintSD, myNumber);
+		//			//dataFile.flush();
+		//			//dataFile.close();
+		//			ledGreenOff();
+		//		}
+
 	}
 	Serial.println("Filename: " + String(dataFile.name()));
-
-	delay(500);
+	disableTimer();
+	Serial.println("Stop record at: " + getCurrentTime());
+	delay(700);
 	dataFile.close();
-	dataTarget = SD.open(targetName, FILE_WRITE);
-	dataFile = SD.open(fileName);
+	delay(100);
 
-	Serial.println("hello ");
-	copyDatToCsv();
-	Serial.println("hello -----");
+	recordcounter++;
+	//Serial.println("Filename: " + String(dataFile.name()));
 
-	dataFile.close();
-	dataTarget.close();
+	//	dataTarget = SD.open(targetName, FILE_WRITE);
+	//	dataFile = SD.open(fileName);
+	//
+	//	copyDatToCsv();
+	//
+	//	dataFile.close();
+	//	dataTarget.close();
 
 	ledGreenOff();
-	disableTimer();
-
 	setStandbyState();
-
 	ledRecordOff();
+}
+
+void setupAkkuCheck(){
+	Serial.println("Akku interrupt setzen");
+	rtc.setAlarmTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds()+10);
+	rtc.enableAlarm(rtc.MATCH_HHMMSS);
+	rtc.attachInterrupt(alarmCheckbattery);
+}
+
+void alarmCheckbattery(){
+	//setupAkkuCheck();
+	Serial.println("interrupt");
+	float batteryVoltage = getBatteryVoltage();
+	ledCalibrationOn();
+	delay(500);
+	ledCalibrationOff();
+	Serial.println(String(batteryVoltage));
+
 }
 
 
@@ -267,7 +319,7 @@ void calibration(){
 	//After finished calibration
 
 	accSensor.setRange(LIS3DH_RANGE_16_G);
-	delay(5000);
+	delay(2000);
 	ledCalibrationOff();
 	setStandbyState();
 }
@@ -433,7 +485,7 @@ void plot3Serial(int16_t plotValue1,int16_t plotValue2,int16_t plotValue3){
 void setupSerial(){
 	Serial.begin(115200);
 	// wait for serial port to connect.
-	while (!Serial);
+	//while (!Serial);
 }
 
 //Setup LIS3DH CLick
@@ -522,10 +574,10 @@ void safeBufferCounterToSD(){
 
 void writeSensorStrDataToSD(){
 	accSensor.read();
-	accSensor.getEvent(&myEvent);
-	xString = myEvent.acceleration.x;
-	yString = myEvent.acceleration.y;
-	zString = myEvent.acceleration.z;
+	//accSensor.getEvent(&myEvent);
+	xString = String(accSensor.x);
+	yString = String(accSensor.y);
+	zString = String(accSensor.z);
 	writeSDStringln(xString + "," + yString + "," + zString);
 
 }
@@ -573,9 +625,9 @@ void copyDatToCsv(){
 	uint16_t ycsv;
 	uint16_t zcsv;
 
-	//Serial.println("Size: " + String(dataFile.size());
+	//Serial.println("Size: " + String(dataFile.size()));
 	while(dataFile.available()){
-		//Serial.printl("Position:" String(dataFile.position());
+		//.println("Position: " + String(dataFile.position()));
 		x1csv = dataFile.read();
 		x2csv = dataFile.read();
 		y1csv = dataFile.read();
@@ -616,7 +668,23 @@ void waitForSetupRTCWithSerial(){
 	//Format:  yymmddhhmmss
 	uint8_t counter = 0;
 	uint8_t previousNum =0;
+
+
 	while(!receivedSerialTime){
+
+		if(state == true) {
+
+			ledRecordOn();
+			ledBatteryOn();
+			ledCalibrationOn();
+		} else {
+			ledRecordOff();
+			ledBatteryOff();
+			ledCalibrationOff();
+
+		}
+		state = !state;
+		delay(200);
 		// send data only when you receive data:
 		if (Serial.available() > 0) {
 			counter++;
@@ -662,6 +730,9 @@ void waitForSetupRTCWithSerial(){
 
 
 	}
+	ledRecordOff();
+	ledBatteryOff();
+	ledCalibrationOff();
 
 }
 
@@ -725,7 +796,7 @@ String getCurrentDateTimeFilename(){
 	str = "";
 
 	//String complete = "ACC"+ myDate +"_"+ myTime +".dat";
-	String complete = "ACC" + myTime +".dat";
+	String complete = myTime +".csv";
 
 	return complete;
 }
@@ -847,26 +918,32 @@ void resetTimer()
 void TC3_Handler() {
 	TcCount16* TC = (TcCount16*) TC3;
 
+	writeSensorStrDataToSD();
+
 
 	// INterrupt function here!!!
-	readAcc();
-	myXbinA= myX >> 8;
-	myXbinB= myX & 0x00FF;
-	myYbinA= myY >> 8;
-	myYbinB= myY & 0x00FF;
-	myZbinA= myZ >> 8;
-	myZbinB= myZ & 0x00FF;
-	myAccbinint [0+counter] = myXbinA;
-	myAccbinint [1+counter] = myXbinB;
-	myAccbinint [2+counter] = myYbinA;
-	myAccbinint [3+counter] = myYbinB;
-	myAccbinint [4+counter] = myZbinA;
-	myAccbinint [5+counter] = myZbinB;
-	counter += 6 ;
-	if (counter+5 >= myNumber) {
-		counter = 0;
-		writeSD = true;
-	}
+	//	readAcc();
+	//	myXbinA= myX >> 8;
+	//	myXbinB= myX & 0x00FF;
+	//	myYbinA= myY >> 8;
+	//	myYbinB= myY & 0x00FF;
+	//	myZbinA= myZ >> 8;
+	//	myZbinB= myZ & 0x00FF;
+	//	myAccbinint [0+counter] = myXbinA;
+	//	myAccbinint [1+counter] = myXbinB;
+	//	myAccbinint [2+counter] = myYbinA;
+	//	myAccbinint [3+counter] = myYbinB;
+	//	myAccbinint [4+counter] = myZbinA;
+	//	myAccbinint [5+counter] = myZbinB;
+	//	counter += 6 ;
+	//	if (counter+5 >= myNumber) {
+	//		counter = 0;
+	//		//		for (uint16_t var = 0; var < myNumber; var++) {
+	//		//			myAccbinintSD[var] = myAccbinint[var];
+	//		//		}
+	//		writeSD = true;
+
+	//}
 	//
 	//
 	//
@@ -891,6 +968,7 @@ void start_stopRecordInterrupt(){
 	if (interrupt_time - last_interrupt_timeRecord > DEBOUNCE_TIME) {
 		if (CurrState == StateRecord) {
 			setStandbyState();
+			//disableTimer();
 		}else if (CurrState == StateStandby) {
 			setRecordState();
 		}
