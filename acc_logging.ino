@@ -112,6 +112,7 @@ uint8_t myAccbinintSD[myNumber];
 bool writeSD = false;
 String testFileName = "";
 uint8_t recordcounter = 0;
+uint16_t divider = 1365;
 
 //-----Calibration-------
 uint16_t counterCalibration = 0;
@@ -196,7 +197,7 @@ void startRecord(){
 
 	String firstLine = "Format: x,y,z ---- Start at: " + getCurrentTime() + "   SampleRate: "
 			+ String(sampleRate) + "Hz    Calibration AngleX: "
-			+ xRot + "°     Calibration AngleY"   + yRot;
+			+ xRot + "     Calibration AngleY"   + yRot + "--- Divider: " + String(divider);
 
 	dataFile.println(firstLine);
 
