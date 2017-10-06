@@ -45,6 +45,10 @@ libraries/RTCZero/src \
 libraries/SD/src \
 libraries/SD/src/utility \
 libraries/SPI \
+libraries/SdFat/src/FatLib \
+libraries/SdFat/src \
+libraries/SdFat/src/SdCard \
+libraries/SdFat/src/SpiDriver \
 libraries/Wire \
 libraries/simplot \
 

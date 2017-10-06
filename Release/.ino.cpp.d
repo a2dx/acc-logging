@@ -107,13 +107,35 @@
  /Users/DW/Documents/Arduino/libraries/Adafruit_Sensor-master/Adafruit_Sensor.h \
  /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/packages/adafruit/hardware/samd/1.0.17/cores/arduino/Print.h \
  /Users/DW/Eclipse/libraries/simplot/simplot.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/SD.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdFat.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/Sd2Card.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/Sd2PinMap.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdInfo.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/FatStructs.h \
- /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdFatUtil.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdFat.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SysCall.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/BlockDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/BaseBlockDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatLibConfig.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdFatConfig.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdSpiCard.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SysCall.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdInfo.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../FatLib/BaseBlockDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../SpiDriver/SdSpiDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../SpiDriver/SdSpiBaseDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatLib.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ArduinoFiles.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatFile.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatApiConstants.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatStructs.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatVolume.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/BlockDriver.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ArduinoStream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/bufstream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/iostream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/istream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ios.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ostream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatFileSystem.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/StdioStream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/fstream.h \
+ /Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdioCard.h \
  /Users/DW/Documents/Arduino/libraries/RTCZero/src/RTCZero.h \
  ../acc_logging.ino
 
@@ -333,19 +355,63 @@
 
 /Users/DW/Eclipse/libraries/simplot/simplot.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/SD.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdFat.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdFat.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SysCall.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/Sd2Card.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/BlockDriver.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/Sd2PinMap.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/BaseBlockDriver.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdInfo.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatLibConfig.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/FatStructs.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdFatConfig.h:
 
-/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SD/1.1.1/src/utility/SdFatUtil.h:
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdSpiCard.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SysCall.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdInfo.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../FatLib/BaseBlockDriver.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../SpiDriver/SdSpiDriver.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/../SpiDriver/SdSpiBaseDriver.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatLib.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ArduinoFiles.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatFile.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatApiConstants.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatStructs.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatVolume.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/BlockDriver.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ArduinoStream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/bufstream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/iostream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/istream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ios.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/ostream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/FatFileSystem.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/StdioStream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/FatLib/fstream.h:
+
+/Applications/sloeber.app/Contents/Eclipse/arduinoPlugin/libraries/SdFat/1.0.1/src/SdCard/SdioCard.h:
 
 /Users/DW/Documents/Arduino/libraries/RTCZero/src/RTCZero.h:
 

@@ -11,6 +11,10 @@ RM := rm -f
 -include subdir.mk
 -include libraries/simplot/subdir.mk
 -include libraries/Wire/subdir.mk
+-include libraries/SdFat/src/SpiDriver/subdir.mk
+-include libraries/SdFat/src/SdCard/subdir.mk
+-include libraries/SdFat/src/FatLib/subdir.mk
+-include libraries/SdFat/src/subdir.mk
 -include libraries/SPI/subdir.mk
 -include libraries/SD/src/utility/subdir.mk
 -include libraries/SD/src/subdir.mk

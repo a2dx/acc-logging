@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-06-13 12:36:55
+//This file has been generated on 2017-10-06 10:41:22
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -15,7 +15,7 @@
 #define CPU_HZ 48000000
 #define TIMER_PRESCALER_DIV 1024
 #include "simplot.h"
-#include <SD.h>
+#include <SdFat.h>
 #define SD_CS 4
 #include "RTCZero.h"
 void setup() ;
@@ -59,12 +59,9 @@ void readAcc();
 void setupSD();
 void writeSDStringln(String str);
 void readSD();
-void safeBufferCounterToSD();
-void writeSensorStrDataToSD();
 void writeSensorIntDataToSD();
 void writeSensorBinToArray();
-void copyDatToCsv();
-void deleteSDFile();
+void binToSD();
 void setupRTC();
 void waitForSetupRTCWithSerial();
 String getCurrentTime();

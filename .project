@@ -67,6 +67,11 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/adafruit/hardware/samd/1.0.17/libraries/SPI</locationURI>
 		</link>
 		<link>
+			<name>libraries/SdFat</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/SdFat/1.0.1</locationURI>
+		</link>
+		<link>
 			<name>libraries/Wire</name>
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/adafruit/hardware/samd/1.0.17/libraries/Wire</locationURI>
